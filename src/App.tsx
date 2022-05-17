@@ -1,45 +1,42 @@
-import { useState } from 'react'
-import logo from './logo.svg'
-import './App.css'
+import { useAuthToken } from "./providers/AuthToken";
+import { Auth } from "./screens/Auth";
+import { Repos } from "./screens/Repos";
+import "./App.css";
+import styled from "styled-components";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const { token } = useAuthToken();
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>Hello Vite + React!</p>
-        <p>
-          <button type="button" onClick={() => setCount((count) => count + 1)}>
-            count is: {count}
-          </button>
-        </p>
-        <p>
-          Edit <code>App.tsx</code> and save to test HMR updates.
-        </p>
-        <p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-          {' | '}
-          <a
-            className="App-link"
-            href="https://vitejs.dev/guide/features.html"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Vite Docs
-          </a>
-        </p>
-      </header>
-    </div>
-  )
+    <AppWrapper>
+      <Header>
+        <Title>Github issue tracker</Title>
+      </Header>
+
+      {token ? <Repos /> : <Auth />}
+    </AppWrapper>
+  );
 }
 
-export default App
+const AppWrapper = styled.div`
+  height: 100%;
+`;
+const Header = styled.div`
+  background-color: #003e6b;
+  height: 100px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 16px;
+
+  @media (max-width: 768px) {
+    flex-direction: 80px;
+  }
+`;
+
+const Title = styled.h1`
+  color: white;
+  font-size: 1.5rem;
+`;
+
+export default App;
