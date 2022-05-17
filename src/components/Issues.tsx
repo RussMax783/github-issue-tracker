@@ -1,8 +1,12 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuthToken } from "../providers/AuthToken";
 import { Issue, Repo } from "../types";
 import { List } from "../common/List";
 import { IssueItem } from "../common/Issue";
+import styled from "styled-components";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import update from "immutability-helper";
 
 interface IssuesProps {
   repo: Repo;
@@ -11,7 +15,7 @@ interface IssuesProps {
 export function Issues({ repo }: IssuesProps) {
   const { token } = useAuthToken();
   const [loading, setLoading] = useState(true);
-  const [issues, setIssues] = useState<Issue[]>();
+  const [issues, setIssues] = useState<Issue[]>([]);
 
   useEffect(() => {
     if (repo) {
@@ -45,6 +49,17 @@ export function Issues({ repo }: IssuesProps) {
     }
   }, [repo]);
 
+  const moveCard = useCallback((dragIndex: number, hoverIndex: number) => {
+    setIssues((prevIssues: Issue[]) =>
+      update(prevIssues, {
+        $splice: [
+          [dragIndex, 1],
+          [hoverIndex, 0, prevIssues[dragIndex] as Issue],
+        ],
+      })
+    );
+  }, []);
+
   if (loading) {
     return (
       <List title="Issues">
@@ -62,10 +77,19 @@ export function Issues({ repo }: IssuesProps) {
   }
 
   return (
-    <List title="Issues">
-      {issues?.map((issue) => (
-        <IssueItem issue={issue} />
-      ))}
-    </List>
+    <DndProvider backend={HTML5Backend}>
+      <List title="Issues">
+        <IssuesList>
+          {issues.map((issue, index) => (
+            <IssueItem key={issue.id} issue={issue} moveCard={moveCard} index={index} />
+          ))}
+        </IssuesList>
+      </List>
+    </DndProvider>
   );
 }
+
+const IssuesList = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
