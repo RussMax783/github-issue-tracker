@@ -12,6 +12,18 @@ interface IssuesProps {
   repo: Repo;
 }
 
+function saveSortOrder(repoId: string, issues: Issue[]) {
+  localStorage.setItem(repoId, JSON.stringify(issues));
+}
+
+function loadSortOrder(repoId: string): Issue[] {
+  const items = localStorage.getItem(repoId);
+  if (items) {
+    return JSON.parse(items);
+  }
+  return [];
+}
+
 export function Issues({ repo }: IssuesProps) {
   const { token } = useAuthToken();
   const [loading, setLoading] = useState(true);
@@ -28,17 +40,22 @@ export function Issues({ repo }: IssuesProps) {
               Authorization: `Bearer ${token}`,
             },
           });
+
           const parsedResponse = await response.json();
+          const currentOrder = loadSortOrder(repo.id);
+
           setIssues(
-            parsedResponse.map(
-              (issue: any): Issue => ({
+            parsedResponse.reduce((acc: Issue[], issue: any) => {
+              if (acc.some((i) => i.id === issue.id)) return acc;
+              acc.push({
                 id: issue.id,
                 avatar: issue.assignees?.map((a: any) => a.avatar_url),
                 createdAt: issue.created_at,
                 title: issue.title,
                 updatedAt: issue.updated_at,
-              })
-            )
+              });
+              return acc;
+            }, currentOrder)
           );
         } catch (err) {
           console.log(err);
@@ -48,6 +65,12 @@ export function Issues({ repo }: IssuesProps) {
       getRepos();
     }
   }, [repo]);
+
+  useEffect(() => {
+    if (issues && issues.length) {
+      saveSortOrder(repo.id, issues);
+    }
+  }, [issues]);
 
   const moveCard = useCallback((dragIndex: number, hoverIndex: number) => {
     setIssues((prevIssues: Issue[]) =>
@@ -92,4 +115,5 @@ export function Issues({ repo }: IssuesProps) {
 const IssuesList = styled.div`
   display: flex;
   flex-direction: column;
+  height: 100%;
 `;
