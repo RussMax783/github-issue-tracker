@@ -1,16 +1,16 @@
-import React, { useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 interface AuthTokenContext {
   token: string;
   setToken: (token: string) => void;
 }
 
-export const AuthToken = React.createContext<AuthTokenContext>({
+export const AuthToken = createContext<AuthTokenContext>({
   token: "",
   setToken: () => {},
 });
 
-export const useAuthToken = (): AuthTokenContext => React.useContext(AuthToken);
+export const useAuthToken = (): AuthTokenContext => useContext(AuthToken);
 
 interface AuthTokenProviderProps {
   children: React.ReactNode;

@@ -12,7 +12,7 @@ export function Auth({}: AuthProps) {
 
   const saveToken = () => {
     if (!tokenInput) {
-      setErrorMsg("Please provide an Github auth token");
+      setErrorMsg("Please provide a Github auth token");
     } else {
       setToken(tokenInput);
     }
@@ -22,10 +22,12 @@ export function Auth({}: AuthProps) {
     <AuthScreen>
       <h3>Enter your Github auth token to get started.</h3>
       <a href="https://github.com/settings/tokens">https://github.com/settings/tokens</a>
+      {errorMsg && <span> {errorMsg}</span>}
       <AuthFormWrapper>
         <Input
           type="text"
           name="token"
+          aria-label="Auth Token"
           placeholder="Auth Token"
           onChange={(e) => {
             setTokenInput(e.target.value);
@@ -38,7 +40,7 @@ export function Auth({}: AuthProps) {
 }
 
 const AuthScreen = styled.div`
-  margin-top: 33%;
+  margin-top: 25%;
   display: flex;
   flex-direction: column;
   justify-content: center;
